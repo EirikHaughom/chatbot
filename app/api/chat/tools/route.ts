@@ -17,11 +17,42 @@ export async function POST(request: Request) {
   try {
     const profile = await getServerProfile()
 
-    checkApiKey(profile.openai_api_key, "OpenAI")
+    checkApiKey(profile.azure_openai_api_key, "Azure OpenAI")
 
-    const openai = new OpenAI({
-      apiKey: profile.openai_api_key || "",
-      organization: profile.openai_organization_id
+    const ENDPOINT = profile.azure_openai_endpoint
+    const KEY = profile.azure_openai_api_key
+
+    let DEPLOYMENT_ID = ""
+    switch (chatSettings.model) {
+      case "gpt-3.5-turbo":
+        DEPLOYMENT_ID = profile.azure_openai_35_turbo_id || ""
+        break
+      case "gpt-4-turbo-preview":
+        DEPLOYMENT_ID = profile.azure_openai_45_turbo_id || ""
+        break
+      case "gpt-4-vision-preview":
+        DEPLOYMENT_ID = profile.azure_openai_45_vision_id || ""
+        break
+      default:
+        return new Response(JSON.stringify({ message: "Model not found" }), {
+          status: 400
+        })
+    }
+
+    if (!ENDPOINT || !KEY || !DEPLOYMENT_ID) {
+      return new Response(
+        JSON.stringify({ message: "Azure resources not found" }),
+        {
+          status: 400
+        }
+      )
+    }
+
+    const azureOpenai = new OpenAI({
+      apiKey: KEY,
+      baseURL: `${ENDPOINT}/openai/deployments/${DEPLOYMENT_ID}`,
+      defaultQuery: { "api-version": "2023-12-01-preview" },
+      defaultHeaders: { "api-key": KEY }
     })
 
     let allTools: OpenAI.Chat.Completions.ChatCompletionTool[] = []
@@ -59,23 +90,25 @@ export async function POST(request: Request) {
       }
     }
 
-    const firstResponse = await openai.chat.completions.create({
-      model: chatSettings.model as ChatCompletionCreateParamsBase["model"],
+    const firstResponse = await azureOpenai.chat.completions.create({
+      model: DEPLOYMENT_ID as ChatCompletionCreateParamsBase["model"],
+      //messages: messages as ChatCompletionCreateParamsBase["messages"],
       messages,
+      temperature: chatSettings.temperature,
+      max_tokens: chatSettings.model === "gpt-4-vision-preview" ? 4096 : null, // TODO: Fix
+      //stream: true
       tools: allTools.length > 0 ? allTools : undefined
     })
+
+    //const firstResponse = await azureOpenai.chat.completions.create({
+    //  model: chatSettings.model as ChatCompletionCreateParamsBase["model"],
+    //  messages,
+    //  tools: allTools.length > 0 ? allTools : undefined
+    //})
 
     const message = firstResponse.choices[0].message
     messages.push(message)
     const toolCalls = message.tool_calls || []
-
-    if (toolCalls.length === 0) {
-      return new Response(message.content, {
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-    }
 
     if (toolCalls.length > 0) {
       for (const toolCall of toolCalls) {
@@ -83,6 +116,7 @@ export async function POST(request: Request) {
         const functionName = functionCall.name
         const argumentsString = toolCall.function.arguments.trim()
         const parsedArgs = JSON.parse(argumentsString)
+        //console.log(parsedArgs) // DEBUG, INPUT to the API call
 
         // Find the schema detail that contains the function name
         const schemaDetail = schemaDetails.find(detail =>
@@ -101,13 +135,16 @@ export async function POST(request: Request) {
           throw new Error(`Path for function ${functionName} not found`)
         }
 
-        const path = pathTemplate.replace(/:(\w+)/g, (_, paramName) => {
-          const value = parsedArgs.parameters[paramName]
+        //const path = pathTemplate.replace(/:(\w+)/g, (_, paramName) => {
+        const path = pathTemplate.replace(/(\{.*?\})/g, (_, paramName) => {
+          const key = paramName.slice(1, -1)
+          const value = parsedArgs.parameters[key]
           if (!value) {
             throw new Error(
-              `Parameter ${paramName} not found for function ${functionName}`
+              `Parameter ${key} not found for function ${functionName}`
             )
           }
+          delete parsedArgs.parameters[key]
           return encodeURIComponent(value)
         })
 
@@ -140,8 +177,13 @@ export async function POST(request: Request) {
             }
           }
 
-          const fullUrl = schemaDetail.url + path
-
+          const queryString = new URLSearchParams(
+            parsedArgs.parameters
+          ).toString()
+          const url = schemaDetail.url + path
+          const fullUrl = `${url}?${queryString}`
+          //const fullUrl = schemaDetail.url + path + "?api-version=2023-10-01-Preview";
+          console.log(fullUrl) // DEBUG
           const bodyContent = parsedArgs.requestBody || parsedArgs
 
           const requestInit = {
@@ -150,7 +192,11 @@ export async function POST(request: Request) {
             body: JSON.stringify(bodyContent) // Use the extracted requestBody or the entire parsedArgs
           }
 
+          //console.log(JSON.stringify(bodyContent)) // DEBUG
+          //console.log(requestInit) //DEBUG
+
           const response = await fetch(fullUrl, requestInit)
+          //console.log(response) // DEBUG
 
           if (!response.ok) {
             data = {
@@ -164,6 +210,9 @@ export async function POST(request: Request) {
           const queryParams = new URLSearchParams(
             parsedArgs.parameters
           ).toString()
+          //console.log(parsedArgs)
+          //console.log(parsedArgs.parameters)
+          //console.log(queryParams)
           const fullUrl =
             schemaDetail.url + path + (queryParams ? "?" + queryParams : "")
 
@@ -175,6 +224,7 @@ export async function POST(request: Request) {
             headers = JSON.parse(customHeaders)
           }
 
+          console.log(fullUrl) // LOGGING DEBUG
           const response = await fetch(fullUrl, {
             method: "GET",
             headers: headers
@@ -189,6 +239,8 @@ export async function POST(request: Request) {
           }
         }
 
+        //console.log(JSON.stringify(data)) // DEBUG, return of the API call
+
         messages.push({
           tool_call_id: toolCall.id,
           role: "tool",
@@ -198,11 +250,21 @@ export async function POST(request: Request) {
       }
     }
 
-    const secondResponse = await openai.chat.completions.create({
-      model: chatSettings.model as ChatCompletionCreateParamsBase["model"],
+    const secondResponse = await azureOpenai.chat.completions.create({
+      model: DEPLOYMENT_ID as ChatCompletionCreateParamsBase["model"],
+      //messages: messages as ChatCompletionCreateParamsBase["messages"],
       messages,
+      temperature: chatSettings.temperature,
+      max_tokens: chatSettings.model === "gpt-4-vision-preview" ? 4096 : null, // TODO: Fix
       stream: true
+      //tools: allTools.length > 0 ? allTools : undefined
     })
+
+    //const secondResponse = await azureOpenai.chat.completions.create({
+    //  model: chatSettings.model as ChatCompletionCreateParamsBase["model"],
+    //  messages,
+    //  stream: true
+    //})
 
     const stream = OpenAIStream(secondResponse)
 
