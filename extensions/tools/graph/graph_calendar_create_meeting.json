@@ -1,0 +1,180 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Microsoft Graph API - Create Teams Meeting",
+      "version": "v1.0",
+      "description": "API for creating Microsoft Teams meetings via Microsoft Graph"
+    },
+    "servers": [
+      {
+        "url": "https://graph.microsoft.com/v1.0"
+      }
+    ],
+    "paths": {
+      "/me/events": {
+        "post": {
+          "summary": "Create a new event (Teams meeting)",
+          "description": "Create a new Microsoft Teams meeting event in the user's calendar.",
+          "operationId": "createTeamsMeeting",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "subject",
+                    "start",
+                    "end",
+                    "attendees",
+                    "isOnlineMeeting",
+                    "onlineMeetingProvider"
+                  ],
+                  "properties": {
+                    "subject": {
+                      "type": "string",
+                      "description": "The subject of the meeting."
+                    },
+                    "body": {
+                      "type": "object",
+                      "properties": {
+                        "contentType": {
+                          "type": "string",
+                          "enum": ["HTML", "text"]
+                        },
+                        "content": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "start": {
+                      "type": "object",
+                      "required": ["dateTime", "timeZone"],
+                      "properties": {
+                        "dateTime": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "timeZone": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "end": {
+                      "type": "object",
+                      "required": ["dateTime", "timeZone"],
+                      "properties": {
+                        "dateTime": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "timeZone": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "location": {
+                      "type": "object",
+                      "properties": {
+                        "displayName": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "attendees": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": ["emailAddress", "type"],
+                        "properties": {
+                          "emailAddress": {
+                            "type": "object",
+                            "required": ["address"],
+                            "properties": {
+                              "address": {
+                                "type": "string",
+                                "format": "email"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": ["required", "optional"]
+                          }
+                        }
+                      }
+                    },
+                    "isOnlineMeeting": {
+                      "type": "boolean"
+                    },
+                    "onlineMeetingProvider": {
+                      "type": "string",
+                      "enum": ["teamsForBusiness"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Meeting successfully created.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Unique identifier for the event."
+                      },
+                      "onlineMeeting": {
+                        "type": "object",
+                        "properties": {
+                          "joinUrl": {
+                            "type": "string",
+                            "format": "uri",
+                            "description": "The URL to join the online meeting."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request. One or more properties are invalid or missing."
+            },
+            "401": {
+              "description": "Unauthorized. The user has not authenticated or their credentials are invalid."
+            },
+            "403": {
+              "description": "Forbidden. The user does not have permission to create the event."
+            },
+            "500": {
+              "description": "Server error. An error occurred on the server while creating the event."
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+        }
+      }
+    },
+    "security": [
+      {
+        "bearerAuth": []
+      }
+    ]
+  }

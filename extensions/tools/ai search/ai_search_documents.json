@@ -1,0 +1,88 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+      "title": "SearchIndexClient",
+      "description": "Client that can be used to query an index and upload, merge, or delete documents.",
+      "version": "2023-11-01"
+    },
+    "servers": [
+      {
+        "url": "https://[aisearchname].search.windows.net/indexes/[indexname]"
+      }
+    ],
+    "paths": {
+      "/docs/search": {
+        "post": {
+          "tags": ["Documents"],
+          "description": "Searches for documents in the index. The 'api-version' query parameter is mandatory and must be included in the request with the value '2023-10-01-Preview'. Omission of this parameter or alteration of its value will result in a non-functioning API call.",
+          "operationId": "Documents_SearchPost",
+          "parameters": [
+            {
+              "name": "api-version",
+              "in": "query",
+              "required": true,
+              "description": "Must be set to '2023-10-01-Preview'. This parameter is required and ensures that the correct API version is targeted for the request.",
+              "schema": {
+                "type": "string",
+                "enum": ["2023-10-01-Preview"]
+              }
+            }
+          ],
+          "requestBody": {
+            "description": "The definition of the Search request. Each property in the request body must be included and set to a specific value unless stated otherwise. Modify 'text' in 'vectorQueries' based on the search context. Do not change other parameters unless necessary.",
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "search",
+                    "vectorQueries",
+                    "queryType",
+                    "queryLanguage",
+                    "select",
+                    "top"
+                  ],
+                  "properties": {
+                    "search": {
+                      "type": "string",
+                      "description": "The query phrase to search for in the vector space. This should be changed based on the search context."
+                    },
+                    "queryType": {
+                      "type": "string",
+                      "enum": ["simple"],
+                      "description": "Must be set to 'simple'."
+                    },
+                    "queryLanguage": {
+                      "type": "string",
+                      "enum": ["en-US"],
+                      "description": "Must be set to 'en-US'."
+                    },
+                    "select": {
+                      "type": "string",
+                      "description": "Must be set to 'content,url,filepath'."
+                    },
+                    "top": {
+                      "type": "integer",
+                      "description": "Must be set to 5."
+                    }
+                  },
+                  "example": {
+                    "queryType": "simple",
+                    "queryLanguage": "en-US",
+                    "select": "content,url,filepath",
+                    "top": 5
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Search response"
+            }
+          }
+        }
+      }
+    }
+  }

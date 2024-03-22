@@ -1,0 +1,74 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Graph Item Search",
+      "version": "0.1.0"
+    },
+    "servers": [
+      {
+        "url": "https://graph.microsoft.com/beta"
+      }
+    ],
+    "paths": {
+      "/search/query": {
+        "post": {
+          "summary": "Search Query",
+          "operationId": "search_query_post",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "requests": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "entityTypes": {
+                            "type": "array",
+                            "items": { "type": "string" },
+                            "description": "required to be exactly: ['driveItem', 'listItem', 'drive', 'list', 'site']. The array needs to include all of these values. important.",
+                            "minItems": 5,
+                            "maxItems": 5,
+                            "uniqueItems": true
+                          },
+                          "query": {
+                            "type": "object",
+                            "properties": { "queryString": { "type": "string" } },
+                            "required": ["queryString"]
+                          },
+                          "top": {
+                            "type": "integer",
+                            "description": "Maximum number of results to return."
+                          }
+                        },
+                        "required": ["entityTypes", "query", "top"]
+                      }
+                    }
+                  },
+                  "required": ["requests"],
+                  "example": {
+                    "requests": [
+                      {
+                        "entityTypes": ["driveItem", "listItem", "drive", "list", "site"],
+                        "query": { "queryString": "contoso" },
+                        "top": 10
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": { "application/json": { "schema": {} } }
+            }
+          }
+        }
+      }
+    }
+  }

@@ -1,0 +1,246 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Microsoft Graph API - Find Meeting Times",
+      "version": "v1.0",
+      "description": "API for finding meeting times via Microsoft Graph"
+    },
+    "servers": [
+      {
+        "url": "https://graph.microsoft.com/v1.0"
+      }
+    ],
+    "paths": {
+      "/me/findMeetingTimes": {
+        "post": {
+          "summary": "Find suitable meeting times",
+          "description": "Find suitable meeting times based on the availability of attendees.",
+          "operationId": "findMeetingTimes",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "attendees",
+                    "timeConstraint",
+                    "locationConstraint",
+                    "meetingDuration"
+                  ],
+                  "properties": {
+                    "attendees": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": ["emailAddress", "type"],
+                        "properties": {
+                          "emailAddress": {
+                            "type": "object",
+                            "required": ["address"],
+                            "properties": {
+                              "address": {
+                                "type": "string",
+                                "format": "email"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": ["Required", "Optional"]
+                          }
+                        }
+                      }
+                    },
+                    "timeConstraint": {
+                      "type": "object",
+                      "required": ["timeslots"],
+                      "properties": {
+                        "timeslots": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": ["start", "end"],
+                            "properties": {
+                              "start": {
+                                "type": "object",
+                                "required": ["dateTime", "timeZone"],
+                                "properties": {
+                                  "dateTime": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                  },
+                                  "timeZone": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "end": {
+                                "type": "object",
+                                "required": ["dateTime", "timeZone"],
+                                "properties": {
+                                  "dateTime": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                  },
+                                  "timeZone": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "locationConstraint": {
+                      "type": "object",
+                      "properties": {
+                        "isRequired": {
+                          "type": "boolean"
+                        },
+                        "suggestLocation": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "meetingDuration": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "A list of suggested meeting times.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "meetingTimeSuggestions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "meetingTimeSlot": {
+                              "type": "object",
+                              "properties": {
+                                "start": {
+                                  "type": "object",
+                                  "properties": {
+                                    "dateTime": {
+                                      "type": "string",
+                                      "format": "date-time"
+                                    },
+                                    "timeZone": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "end": {
+                                  "type": "object",
+                                  "properties": {
+                                    "dateTime": {
+                                      "type": "string",
+                                      "format": "date-time"
+                                    },
+                                    "timeZone": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "confidence": {
+                              "type": "number"
+                            },
+                            "locations": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "displayName": {
+                                    "type": "string"
+                                  },
+                                  "locationEmailAddress": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "attendeeAvailability": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "attendee": {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string"
+                                      },
+                                      "emailAddress": {
+                                        "type": "object",
+                                        "properties": {
+                                          "name": {
+                                            "type": "string"
+                                          },
+                                          "address": {
+                                            "type": "string",
+                                            "format": "email"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "availability": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request. One or more properties are invalid or missing."
+            },
+            "401": {
+              "description": "Unauthorized. The user has not authenticated or their credentials are invalid."
+            },
+            "403": {
+              "description": "Forbidden. The user does not have permission to find meeting times."
+            },
+            "500": {
+              "description": "Server error. An error occurred on the server while finding meeting times."
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+        }
+      }
+    },
+    "security": [
+      {
+        "bearerAuth": []
+      }
+    ]
+  }

@@ -1,0 +1,64 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Message Search",
+      "version": "0.1.0"
+    },
+    "servers": [
+      {
+        "url": "https://graph.microsoft.com/beta"
+      }
+    ],
+    "paths": {
+      "/search/query": {
+        "post": {
+          "summary": "Search Message",
+          "operationId": "search_message_post",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "requests": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "entityTypes": {
+                            "type": "array",
+                            "items": { "type": "string", "enum": ["message"] },
+                            "description": "Entity type to search within, must be exactly: ['message']",
+                            "minItems": 1,
+                            "maxItems": 1
+                          },
+                          "query": {
+                            "type": "object",
+                            "properties": { "queryString": { "type": "string" } },
+                            "required": ["queryString"]
+                          },
+                          "top": {
+                            "type": "integer",
+                            "description": "Maximum number of results to return."
+                          }
+                        },
+                        "required": ["entityTypes", "query", "top"]
+                      }
+                    }
+                  },
+                  "required": ["requests"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": { "application/json": { "schema": {} } }
+            }
+          }
+        }
+      }
+    }
+  }

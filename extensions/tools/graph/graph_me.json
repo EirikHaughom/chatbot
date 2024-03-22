@@ -1,0 +1,123 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+      "title": "Microsoft Graph API - User Profile and Insights Endpoints",
+      "description": "Endpoints related to the user profile, user insights, and devices in Microsoft Graph.",
+      "version": "1.0.0"
+    },
+    "servers": [
+      {
+        "url": "https://graph.microsoft.com/v1.0"
+      }
+    ],
+    "paths": {
+      "/me": {
+        "get": {
+          "summary": "Get current user profile",
+          "description": "Retrieves details of the currently authenticated user.",
+          "operationId": "getCurrentUserProfile",
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/me/manager": {
+        "get": {
+          "summary": "Get current user's manager",
+          "description": "Retrieves the manager of the currently authenticated user.",
+          "operationId": "getCurrentUserManager",
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/me/insights/trending": {
+        "get": {
+          "summary": "Get trending insights",
+          "description": "Retrieves a list of documents that are trending around the currently authenticated user. The `$top` parameter is required.",
+          "operationId": "getTrendingInsights",
+          "parameters": [
+            {
+              "name": "$top",
+              "in": "query",
+              "required": true,
+              "description": "The number of items to return. This parameter is required and defaults to 5 unless otherwise specified.",
+              "schema": {
+                "type": "integer",
+                "default": 5
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/me/insights/shared": {
+        "get": {
+          "summary": "Get shared insights",
+          "description": "Retrieves a list of documents shared with or by the currently authenticated user. The `$top` parameter is required.",
+          "operationId": "getSharedInsights",
+          "parameters": [
+            {
+              "name": "$top",
+              "in": "query",
+              "required": true,
+              "description": "The number of items to return. This parameter is required and defaults to 5 unless otherwise specified.",
+              "schema": {
+                "type": "integer",
+                "default": 5
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/me/insights/used": {
+        "get": {
+          "summary": "Get usage insights",
+          "description": "Retrieves a list of documents that the currently authenticated user has recently used. The `$top` parameter is required.",
+          "operationId": "getUsedInsights",
+          "parameters": [
+            {
+              "name": "$top",
+              "in": "query",
+              "required": true,
+              "description": "The number of items to return. This parameter is required and defaults to 5 unless otherwise specified.",
+              "schema": {
+                "type": "integer",
+                "default": 5
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/me/ownedDevices": {
+        "get": {
+          "summary": "Get owned devices",
+          "description": "Retrieves a list of devices that are owned by the currently authenticated user.",
+          "operationId": "getOwnedDevices",
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      }
+    }
+  }

@@ -1,0 +1,48 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Microsoft Graph API - Outlook Calendar",
+      "version": "v1.0",
+      "description": "Microsoft Graph API for accessing Outlook Calendar events"
+    },
+    "servers": [
+      {
+        "url": "https://graph.microsoft.com/v1.0"
+      }
+    ],
+    "paths": {
+      "/me/calendarview": {
+        "get": {
+          "summary": "Get calendar events for the next week",
+          "operationId": "getCalendarEvents",
+          "parameters": [
+            {
+              "name": "startDateTime",
+              "in": "query",
+              "required": true,
+              "description": "The start date and time of the event range to retrieve.",
+              "schema": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            {
+              "name": "endDateTime",
+              "in": "query",
+              "required": true,
+              "description": "The end date and time of the event range to retrieve.",
+              "schema": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response with calendar events details."
+            }
+          }
+        }
+      }
+    }
+  }
