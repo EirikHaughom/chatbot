@@ -4,29 +4,6 @@ The open-source AI chat app for everyone.
 
 <img src="./public/readme/screenshot.png" alt="Chatbot UI" width="600">
 
-## Demo
-
-View the latest demo [here](https://x.com/mckaywrigley/status/1738273242283151777?s=20).
-
-## Updates
-
-Hey everyone! I've heard your feedback and am working hard on a big update.
-
-Things like simpler deployment, better backend compatibility, and improved mobile layouts are on their way.
-
-Be back soon.
-
--- Mckay
-
-## Official Hosted Version
-
-Use Chatbot UI without having to host it yourself!
-
-Find the official hosted version of Chatbot UI [here](https://chatbotui.com).
-
-## Sponsor
-
-If you find Chatbot UI useful, please consider [sponsoring](https://github.com/sponsors/mckaywrigley) me to support my open-source work :)
 
 ## Issues
 
@@ -37,14 +14,6 @@ We're getting escessive amounts of issues that amount to things like feature req
 If you are having issues with things like setup, please refer to the "Help" section in the "Discussions" tab above.
 
 Issues unrelated to the codebase will likely be closed immediately.
-
-## Discussions
-
-We highly encourage you to participate in the "Discussions" tab above!
-
-Discussions are a great place to ask questions, share ideas, and get help.
-
-Odds are if you have a question, someone else has the same question.
 
 ## Legacy Code
 
@@ -71,8 +40,6 @@ to apply the latest migrations to your live database.
 ## Local Quickstart
 
 Follow these steps to get your own Chatbot UI instance running locally.
-
-You can watch the full video tutorial [here](https://www.youtube.com/watch?v=9Qq3-7-HNgw).
 
 ### 1. Clone the Repo
 
